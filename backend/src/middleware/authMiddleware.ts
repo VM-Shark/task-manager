@@ -1,14 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { verifyToken } from "../utils/jwt";
-import { PrismaClient, User, Role } from "@prisma/client";
+import { AuthRequest } from "../types/AuthRequest";
 
-const prisma = new PrismaClient();
-
-export interface AuthRequest extends Request {
-  user?: User;
-}
-
-export const authenticate = async (
+export const authenticate = (
   req: AuthRequest,
   res: Response,
   next: NextFunction
@@ -19,24 +13,25 @@ export const authenticate = async (
   }
 
   try {
-    const decoded = verifyToken(token) as { userId: string };
+    const decoded = verifyToken(token) as {
+      id: string;
+      email: string;
+      role: "ADMIN" | "USER";
+    };
 
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-    });
+    req.user = {
+      id: decoded.id, // Store id correctly
+      email: decoded.email, // Ensure email is included
+      role: decoded.role, // Keep role as "ADMIN" | "USER"
+    };
 
-    if (!user) {
-      return res.status(401).json({ error: "Invalid token: User not found." });
-    }
-
-    req.user = user;
     next();
   } catch (err) {
     res.status(401).json({ error: "Invalid token" });
   }
 };
 
-export const authorize = (roles: Role[]) => {
+export const authorize = (roles: ("ADMIN" | "USER")[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
     if (!req.user || !roles.includes(req.user.role)) {
       return res.status(403).json({ error: "Access forbidden" });
