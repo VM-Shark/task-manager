@@ -7,8 +7,10 @@ import authRoutes from "./routes/authRoutes";
 import config from "./config";
 import userRoutes from "./routes/userRoutes";
 import taskRoutes from "./routes/taskRoutes";
+import { setupSwagger } from "./config/swagger";
 
 const app = express();
+setupSwagger(app);
 
 app.use(express.json());
 app.use(cors());
