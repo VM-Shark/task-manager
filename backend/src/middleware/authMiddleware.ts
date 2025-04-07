@@ -20,9 +20,9 @@ export const authenticate = (
     };
 
     req.user = {
-      id: decoded.id, // Store id correctly
-      email: decoded.email, // Ensure email is included
-      role: decoded.role, // Keep role as "ADMIN" | "USER"
+      id: decoded.id,
+      email: decoded.email,
+      role: decoded.role,
     };
 
     next();

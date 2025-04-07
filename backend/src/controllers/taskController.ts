@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import prisma from "../config/prisma";
 import { AuthRequest } from "../types/AuthRequest";
 
+// Create task
 export const createTask = async (req: AuthRequest, res: Response) => {
   try {
     if (req.user?.role !== "ADMIN") {
@@ -9,6 +10,12 @@ export const createTask = async (req: AuthRequest, res: Response) => {
     }
 
     const { title, description, assigneeId, dueDate } = req.body;
+
+    if (!title || !description || !assigneeId || !dueDate) {
+      return res.status(400).json({
+        error: "Title, description, asigneee and dueDate are required.",
+      });
+    }
     const task = await prisma.task.create({
       data: {
         title,
@@ -25,6 +32,7 @@ export const createTask = async (req: AuthRequest, res: Response) => {
   }
 };
 
+// Get tasks
 export const getTasks = async (req: AuthRequest, res: Response) => {
   try {
     let tasks;
@@ -43,6 +51,7 @@ export const getTasks = async (req: AuthRequest, res: Response) => {
   }
 };
 
+// Update task
 export const updateTaskStatus = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
@@ -68,6 +77,7 @@ export const updateTaskStatus = async (req: AuthRequest, res: Response) => {
   }
 };
 
+// Delete task
 export const deleteTask = async (req: AuthRequest, res: Response) => {
   try {
     if (req.user?.role !== "ADMIN") {
