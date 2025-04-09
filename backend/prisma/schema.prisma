@@ -9,24 +9,36 @@ datasource db {
 }
 
 model User {
-  id       String  @id @default(uuid())
-  email    String  @unique
+  id       String   @id @default(uuid())
+  email    String   @unique
   password String
-  role     Role    @default(USER)
-  tasks    Task[]
+  role     Role     @default(USER)
+  tasks    Task[]   @relation("AssignedTasks")   // This is the relation field for tasks assigned to the user
+  comments Comment[] @relation("UserComments")   // Added relation for comments made by the user
 }
 
 model Task {
-  id          String   @id @default(uuid())
+  id          String     @id @default(uuid())
   title       String
   description String
-  assignee    User     @relation(fields: [assigneeId], references: [id])
+  assignee    User       @relation("AssignedTasks", fields: [assigneeId], references: [id]) // Added @relation to link to User model
   assigneeId  String
-  createdAt   DateTime @default(now())
+  createdAt   DateTime   @default(now())
   createdBy   String?
   dueDate     DateTime?
-  comments    String[]
-  status      Status   @default(TODO)
+  status      Status     @default(TODO)
+  comments    Comment[]  @relation("TaskComments")  // Relation to Comment model
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  taskId    String
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+
+  task      Task     @relation("TaskComments", fields: [taskId], references: [id]) // Added relation to Task model
+  user      User     @relation("UserComments", fields: [userId], references: [id])  // Added relation to User model
 }
 
 enum Role {
@@ -39,4 +51,3 @@ enum Status {
   IN_PROGRESS
   DONE
 }
-
